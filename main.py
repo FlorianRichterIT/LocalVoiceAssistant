@@ -1,16 +1,27 @@
-# This is a sample Python script.
-
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+import pyttsx3
+import pygame
+import time
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+def file_exists(file_path):
+    try:
+        with open(file_path):
+            return True
+    except FileNotFoundError:
+        return False
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+def play_mp3(file_path):
+    pygame.mixer.init()
+    pygame.mixer.music.load(file_path)
+    pygame.mixer.music.play()
+    while pygame.mixer.music.get_busy():
+        time.sleep(1)
+
+
+mp3_file_path = "./voiceRecordings/Licht schalten.mp3"
+if file_exists(mp3_file_path):
+    play_mp3(mp3_file_path)
+    print("File played")
+else:
+    print(file_exists(mp3_file_path))
