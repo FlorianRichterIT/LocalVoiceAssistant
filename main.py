@@ -1,5 +1,4 @@
-import speechToText.playMp3 as playMp3
-import speechToText.speechToText as speechToText
+from speechToText.speechToText import speech_to_text
 
 
 def file_exists(file_path):
@@ -10,10 +9,7 @@ def file_exists(file_path):
         return False
 
 
-mp3_file_path = "./voiceRecordings/Licht schalten.mp3"
+mp3_file_path = "./voiceRecordings/Licht schalten.wav"
+
 if file_exists(mp3_file_path):
-    playMp3.play_mp3(mp3_file_path)
-    speechToText.speech_to_text(mp3_file_path)
-    #transcribe_mp3()
-else:
-    print(file_exists(mp3_file_path))
+    print(speech_to_text(mp3_file_path))

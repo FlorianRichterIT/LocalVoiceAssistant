@@ -1,22 +1,12 @@
-from pocketsphinx import LiveSpeech
-from pocketsphinx import AudioFile
+import speech_recognition as sr
 
 
+# Using https://thepythoncode.com/article/using-speech-recognition-to-convert-speech-to-text-python
 def speech_to_text(mp3FilePath):
-    # Initialisiere den AudioFile-Recognizer für die MP3-Datei
-    audio = AudioFile(audio_file=mp3FilePath)
+    recognizer = sr.Recognizer()
 
-    # Warte auf Spracheingabe und erkenne den Text
-    for phrase in audio:
-        print("Erkannter Text:", phrase)
+    with sr.AudioFile(mp3FilePath) as source:
+        audio_data = recognizer.record(source)
+        text = recognizer.recognize_google(audio_data, None, "de-DE")
+        return text
 
-
-def transcribe_mp3():
-    # Initialisiere den LiveSpeech-Recognizer
-    speech = LiveSpeech()
-
-    print("Spreche etwas... (Drücke Ctrl+C zum Beenden)")
-
-    # Warte auf Spracheingabe und erkenne den Text
-    for phrase in speech:
-        print("Erkannter Text:", phrase)
