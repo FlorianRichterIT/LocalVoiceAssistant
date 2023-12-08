@@ -2,7 +2,7 @@ import config
 import requests
 from datetime import datetime, timedelta
 
-urlStart = "http://" + config.HOME_ASSISTANT_URL
+urlStart = "http://" + config.HOME_ASSISTANT_URL + "/api"
 
 headers = {
     "Authorization": "Bearer " + config.HOME_ASSISTANT_TOKEN,
@@ -11,11 +11,11 @@ headers = {
 
 
 def get_calendars():
-    url = urlStart + "/api/calendars"
+    url = urlStart + "/calendars"
 
     response = requests.get(url, headers=headers)
 
-    return response.text
+    return response.json()
 
 
 def get_calendar_events(calendar_name):
@@ -25,11 +25,7 @@ def get_calendar_events(calendar_name):
     seven_days_from_now = seven_days_from_now.isoformat() + "Z"
 
     # Füge das aktuelle Datum als Parameter zum API-Aufruf hinzu
-    url = f"{urlStart}/api/calendars/{calendar_name}?start={current_date}&end={seven_days_from_now}"
+    url = f"{urlStart}/calendars/{calendar_name}?start={current_date}&end={seven_days_from_now}"
     response = requests.get(url, headers=headers)
 
-    return response.text
-
-
-print(get_calendars())
-print(get_calendar_events("calendar.arbeit"))
+    return response.json()
