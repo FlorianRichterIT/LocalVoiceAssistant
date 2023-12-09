@@ -1,4 +1,5 @@
-from datetime import timedelta, datetime
+import string
+from datetime import timedelta, datetime, timezone, time
 
 import config
 import requests
@@ -11,7 +12,7 @@ headers = {
 }
 
 
-def get_API_state():
+def is_API_running():
     url = urlStart + "/"
 
     response = requests.get(url, headers=headers)
@@ -23,11 +24,12 @@ def get_API_state():
         # Extrahiere den Wert des "message"-Schlüssels
         message_value = data.get("message")
 
-        cleaned_message = message_value.rstrip(".")
+        if message_value == "API running.":
+            return True
+        else:
+            return False
 
-        return cleaned_message
-
-    return f"Fehler bei der Anfrage. Statuscode: {response.status_code}"
+    return False
 
 
 def get_config():
@@ -35,7 +37,12 @@ def get_config():
 
     response = requests.get(url, headers=headers)
 
-    return response.json()
+    map = dict()
+
+    for key, value in response.json().items():
+        map.update({key: value})
+
+    return map
 
 
 def get_events():
@@ -51,11 +58,39 @@ def get_services():
 
     response = requests.get(url, headers=headers)
 
+    map = dict()
+
+    for eachService in response.json():
+        map.update({eachService.get("domain"): eachService})
+
+    return map
+
+
+def get_history_past_day(entity_id):
+    url = urlStart + "/history/period?filter_entity_id=" + entity_id
+
+    response = requests.get(url, headers=headers)
+
+    """config_map = dict()
+
+    for each in response.json():
+        for entry in each:
+            last_changed = entry.get("last_changed")
+            config_map.update({last_changed: entry})"""
+
     return response.json()
 
 
-def get_history(entity_id):
-    url = urlStart + "/history/period?filter_entity_id=" + entity_id
+def get_history_with_date(entity_id, start_date):
+    url = urlStart + "/history/period/" + start_date + "?filter_entity_id=" + entity_id
+
+    response = requests.get(url, headers=headers)
+
+    return response.json()
+
+
+def get_history_with_date_range(entity_id, start_date, end_date):
+    url = urlStart + "/history/period/" + start_date + "?end_time=" + end_date + "&filter_entity_id=" + entity_id
 
     response = requests.get(url, headers=headers)
 
@@ -75,12 +110,19 @@ def get_logbook(entity_id, start_date, end_date):
     return response.json()
 
 
-def get_states():
+def get_all_states():
     url = urlStart + "/states"
 
     response = requests.get(url, headers=headers)
 
-    return response.json()
+    config_map = dict()
+
+    for each in response.json():
+        eachEntityId = each.get("entity_id")
+        each.pop("entity_id")
+        config_map.update({eachEntityId: each})
+
+    return config_map
 
 
 def get_states_of_entity(entity_id):
@@ -88,7 +130,12 @@ def get_states_of_entity(entity_id):
 
     response = requests.get(url, headers=headers)
 
-    return response.json()
+    config_map = dict()
+
+    for key in response.json():
+        config_map.update({key: response.json()[key]})
+
+    return config_map
 
 
 def get_error_log():
@@ -96,7 +143,7 @@ def get_error_log():
 
     response = requests.get(url, headers=headers)
 
-    return response.json()
+    return response.json
 
 
 def get_camera_proxy(entity_id):
@@ -107,24 +154,9 @@ def get_camera_proxy(entity_id):
     return response.json()
 
 
-"""
-print(get_API_state())
-print(get_config())
-for event in get_events():
-    print(f"Event: {event['event']}, Listener Count: {event['listener_count']}")
-for each in get_services():
-    print(each)
-print(get_history) 
+config_map = get_history_past_day("light.schreibtischlampe")
 
-for each in get_logbook(
-        "light.schreibtischlampe",
-        (datetime.utcnow() + timedelta(days=-7)).isoformat(),
-        datetime.utcnow()
-):
-    print(each)
-    
-print(get_states)
-print(get_states_of_entity("light.schreibtischlampe"))
-"""
-
-print(get_error_log)
+for each in config_map:
+    for entry in each:
+        print(entry)
+        print(datetime.fromisoformat(entry.get("last_changed")).time())
